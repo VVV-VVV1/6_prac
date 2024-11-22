@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  apache:
+    build:
+      context: .
+      dockerfile: apache/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - redis
+      - db
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./apache/site:/var/www/html
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - apache
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: my_database
+    ports:
+      - "3306:3306"
